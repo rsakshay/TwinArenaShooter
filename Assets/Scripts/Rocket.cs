@@ -116,6 +116,12 @@ public class Rocket : MonoBehaviour {
 
     void DestroyRocket()
     {
+        GameManager.Instance.GetPlayer(playerNumber).OnRocketDestroyed();
         Destroy(gameObject);
+    }
+
+    private void OnBecameInvisible()
+    {
+        DestroyRocket();
     }
 }

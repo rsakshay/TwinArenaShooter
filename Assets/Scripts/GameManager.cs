@@ -148,6 +148,11 @@ public class GameManager : MonoBehaviour {
             {
                 p2SP = child.gameObject;
             }
+
+            if (child.name.ToLower().Contains("canvas"))
+            {
+                child.gameObject.SetActive(true);
+            }
         }
 
         InstantiatePlayer(p1SP.transform.position, 1);
@@ -221,7 +226,7 @@ public class GameManager : MonoBehaviour {
             if (child.name.ToLower().Contains("winnertext"))
             {
                 Text winnerText = child.GetComponent<Text>();
-                winnerText.text = "Player " + (winner + 1) + " Vectory!!!";
+                winnerText.text = "Player " + (winner + 1) + " Victory!!!";
                 winnerText.color = PlayerColors[winner];
             }
         }
@@ -240,5 +245,10 @@ public class GameManager : MonoBehaviour {
 
         players.Clear();
         winner = 0;
+    }
+
+    public Player GetPlayer(int playerNum)
+    {
+        return players[playerNum - 1];
     }
 }
