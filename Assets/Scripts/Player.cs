@@ -6,9 +6,10 @@ public class Player : MonoBehaviour {
 
     public int playerNumber = 1;
     public float MAX_SPEED = 10;
-    public Vector2 velocity;
-
-    private bool m_isAxisInUse = false;
+    public int HP = 10;
+    public GameObject rocket;
+    
+    private bool isJumping = false;
     private Rigidbody2D rgb2d;
 
     // Use this for initialization
@@ -20,7 +21,6 @@ public class Player : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        velocity = rgb2d.velocity;
         HandleInputs();
 	}
 
@@ -29,43 +29,46 @@ public class Player : MonoBehaviour {
         Vector2 vel = rgb2d.velocity;
 
         if (vel.y > 0)
+        {
             vel.y *= 0.9f;
+
+            if (vel.y < 0.001f)
+                isJumping = false;
+        }
 
         float x = Input.GetAxis("Horizontal_P" + playerNumber);
         float y = 0;
 
-        if (Input.GetButtonDown("Jump_P" + playerNumber))
+        if (Input.GetButtonDown("Jump_P" + playerNumber) && !isJumping)
         {
             y = 10;
+            isJumping = true;
         }
 
-        if (Input.GetAxisRaw("Fire1_P" + playerNumber) != 0)
+        if (Input.GetButtonDown("Fire1_P" + playerNumber))
         {
-            if (m_isAxisInUse == false)
-            {
-                m_isAxisInUse = true;
-
-                //Fire
-            }
-        }
-        else
-        {
-            m_isAxisInUse = false;
+            //Fire
+            GameObject laaunchedRocket = Instantiate(rocket, transform.position + (Vector3.up * 2), Quaternion.identity);
+            laaunchedRocket.GetComponent<Rocket>().LiftOff(playerNumber);
         }
 
 
         vel.x += x;
-        
-        if (vel.y <= 0.001f && vel.y >= 0)
-        {
-            vel.y += y;
-        }
+        vel.y += y;
 
-        if (vel.magnitude > MAX_SPEED)
+        if (Mathf.Abs(vel.x) > MAX_SPEED)
         {
-            vel = vel.normalized * MAX_SPEED;
+            vel.x = MAX_SPEED * (Mathf.Abs(vel.x) / vel.x);
         }
 
         rgb2d.velocity = vel;
+    }
+
+    public void TakeDamage(int val)
+    {
+        HP -= val;
+
+        if (HP <= 0)
+            Destroy(gameObject);
     }
 }
