@@ -11,3 +11,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Proto.unity
     guid: 5d9116e61c6859f48aeb8130770f43ac
+  - enabled: 1
+    path: Assets/Scenes/EndScreen.unity
+    guid: 7efa65c695b43ad48935afb40926a8e3

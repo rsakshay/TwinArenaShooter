@@ -24,6 +24,7 @@ public class Rocket : MonoBehaviour {
     // Use this for initialization
     void Start () {
         rgb2d = GetComponent<Rigidbody2D>();
+        GetComponent<SpriteRenderer>().color = GameManager.Instance.PlayerColors[playerNumber - 1];
     }
 
     // Update is called once per frame

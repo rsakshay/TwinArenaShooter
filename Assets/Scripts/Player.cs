@@ -71,4 +71,5 @@ public class Player : MonoBehaviour {
         if (HP <= 0)
             Destroy(gameObject);
     }
+
 }

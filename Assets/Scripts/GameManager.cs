@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour {
 
@@ -21,6 +22,7 @@ public class GameManager : MonoBehaviour {
     private GameState currentState = GameState.TitleScreen;
     private GameObject currentLevel;
     private List<Player> players = new List<Player>();
+    private int winner = 0;
 
     private void Awake()
     {
@@ -35,7 +37,6 @@ public class GameManager : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        currentLevel = GameObject.Find("Level");
 	}
 	
 	// Update is called once per frame
@@ -44,22 +45,68 @@ public class GameManager : MonoBehaviour {
         switch(currentState)
         {
             case GameState.TitleScreen:
-                if (SceneManager.sceneCount == 1)
-                {
-                    currentLevel.transform.Translate(Vector3.up * 20);
-                    NavCamera.Instance.transform.Translate(Vector3.up * 20);
+                if (NavCamera.Instance.currentState != NavCamera.CameraState.Static)
+                    return;
 
-                    SceneManager.LoadSceneAsync(1, LoadSceneMode.Additive);
+                if (currentLevel == null)
+                {
+                    foreach (GameObject go in gameObject.scene.GetRootGameObjects())
+                    {
+                        if (go.name.ToLower().Contains("level"))
+                            currentLevel = go;
+                    }
+
+                    if (!currentLevel.activeSelf)
+                        currentLevel.SetActive(true);
+
+                    if (SceneManager.sceneCount == 1)
+                    {
+                        currentLevel.transform.Translate(Vector3.up * 20);
+                        NavCamera.Instance.transform.Translate(Vector3.up * 20);
+
+                        SceneManager.LoadSceneAsync(1, LoadSceneMode.Additive);
+                    }
+
+                    currentLevel.GetComponentInChildren<Button>().onClick.AddListener(InitGame);
                 }
                 break;
 
             case GameState.InGame:
+                if (NavCamera.Instance.currentState != NavCamera.CameraState.Static)
+                    return;
+
+                if (currentLevel == null)
+                    StartGame();
+
+                if (CheckIfPlayersAlive())
+                    UpdateUI();
+                else
+                    EndGame();
                 break;
 
             case GameState.EndScreen:
-                if (SceneManager.sceneCount == 0)
+                if (currentLevel == null)
                 {
-                    SceneManager.LoadSceneAsync(0, LoadSceneMode.Additive);
+                    foreach (GameObject go in gameObject.scene.GetRootGameObjects())
+                    {
+                        if (go.name.ToLower().Contains("level"))
+                            currentLevel = go;
+                    }
+
+                    if (!currentLevel.activeSelf)
+                        currentLevel.SetActive(true);
+
+                    if (SceneManager.sceneCount == 1)
+                    {
+                        currentLevel.transform.Translate(Vector3.down * 20);
+                        NavCamera.Instance.transform.Translate(Vector3.down * 20);
+
+                        SceneManager.LoadSceneAsync(0, LoadSceneMode.Additive);
+                    }
+                    
+                    UpdateWinnerText();
+
+                    currentLevel.GetComponentInChildren<Button>().onClick.AddListener(MainMenu);
                 }
                 break;
         }
@@ -67,7 +114,8 @@ public class GameManager : MonoBehaviour {
 
     public void InitGame()
     {
-        SceneManager.MergeScenes(SceneManager.GetSceneAt(0), SceneManager.GetSceneAt(1));
+        if (SceneManager.sceneCount > 1)
+            SceneManager.MergeScenes(SceneManager.GetSceneAt(0), SceneManager.GetSceneAt(1));
 
         Destroy(currentLevel);
         
@@ -77,10 +125,12 @@ public class GameManager : MonoBehaviour {
         currentState = GameState.InGame;
     }
 
-    public void StartGame()
+    void StartGame()
     {
         if (currentLevel == null)
             currentLevel = GameObject.Find("Level");
+
+        SceneManager.LoadSceneAsync(2, LoadSceneMode.Additive);
 
         //Instantiate players
         //Find spawn points
@@ -104,6 +154,14 @@ public class GameManager : MonoBehaviour {
         InstantiatePlayer(p2SP.transform.position, 2);
     }
 
+    void EndGame()
+    {
+        SceneManager.MergeScenes(SceneManager.GetSceneAt(0), SceneManager.GetSceneAt(1));
+
+        Destroy(currentLevel);
+        currentState = GameState.EndScreen;
+    }
+
     void InstantiatePlayer(Vector3 position, int pNum)
     {
         GameObject p = Instantiate(PlayerPrefab, position, Quaternion.identity, currentLevel.transform);
@@ -114,5 +172,73 @@ public class GameManager : MonoBehaviour {
         p.GetComponent<SpriteRenderer>().color = PlayerColors[pNum - 1];
 
         players.Add(player);
+    }
+
+    void UpdateUI()
+    {
+        Transform canvas = currentLevel.GetComponentInChildren<Canvas>(true).transform;
+
+        foreach(Transform child in canvas)
+        {
+            if (child.name.ToLower().Contains("p1hp"))
+            {
+                child.GetComponent<Text>().text = "Player 1 HP: " + players[0].HP;
+            }
+
+            if (child.name.ToLower().Contains("p2hp"))
+            {
+                child.GetComponent<Text>().text = "Player 2 HP: " + players[1].HP;
+            }
+        }
+    }
+
+    bool CheckIfPlayersAlive()
+    {
+        int win = 1;
+        foreach (Player player in players)
+        {
+            if (player == null)
+            {
+                winner = win;
+                return false;
+            }
+
+            win = (win + 1) % 2;
+        }
+
+        return true;
+    }
+
+    void UpdateWinnerText()
+    {
+        if (currentLevel == null)
+            return;
+
+        Transform canvas = currentLevel.GetComponentInChildren<Canvas>(true).transform;
+
+        foreach (Transform child in canvas)
+        {
+            if (child.name.ToLower().Contains("winnertext"))
+            {
+                Text winnerText = child.GetComponent<Text>();
+                winnerText.text = "Player " + (winner + 1) + " Vectory!!!";
+                winnerText.color = PlayerColors[winner];
+            }
+        }
+    }
+
+    public void MainMenu()
+    {
+        //Tween Camera
+        NavCamera.Instance.MoveToNewLocation(Vector2.zero);
+
+        SceneManager.MergeScenes(SceneManager.GetSceneAt(0), SceneManager.GetSceneAt(1));
+
+        Destroy(currentLevel);
+
+        currentState = GameState.TitleScreen;
+
+        players.Clear();
+        winner = 0;
     }
 }

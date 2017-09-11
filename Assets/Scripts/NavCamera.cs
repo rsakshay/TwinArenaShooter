@@ -46,7 +46,6 @@ public class NavCamera : MonoBehaviour {
                 {
                     transform.position = targetPos;
                     currentState = CameraState.Static;
-                    GameManager.Instance.StartGame();
                 }
                 else
                     transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * moveSpeed);
