@@ -118,6 +118,7 @@ GameObject:
   - component: {fileID: 54917543}
   - component: {fileID: 54917545}
   - component: {fileID: 54917544}
+  - component: {fileID: 54917546}
   m_Layer: 0
   m_Name: Floor (5)
   m_TagString: Untagged
@@ -132,7 +133,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 54917542}
   m_LocalRotation: {x: -0, y: -0, z: 0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: -0, y: -5, z: 0}
+  m_LocalPosition: {x: -0, y: -7, z: 0}
   m_LocalScale: {x: 10, y: 1.0000005, z: 1}
   m_Children: []
   m_Father: {fileID: 297545403}
@@ -205,6 +206,18 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
+--- !u!114 &54917546
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 54917542}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b17e1c9e6a93b4c4696072118aa79bcf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  finalPos: {x: 0, y: -4, z: 0}
 --- !u!1 &163357799
 GameObject:
   m_ObjectHideFlags: 0
@@ -401,6 +414,7 @@ MonoBehaviour:
   PlayerColors:
   - {r: 0.9275862, g: 0.30147058, b: 0.022058824, a: 1}
   - {r: 0.18965518, g: 0.32352942, b: 0.6764706, a: 1}
+  currentState: 1
 --- !u!4 &440679172
 Transform:
   m_ObjectHideFlags: 0
@@ -621,6 +635,7 @@ GameObject:
   - component: {fileID: 1460436570}
   - component: {fileID: 1460436572}
   - component: {fileID: 1460436571}
+  - component: {fileID: 1460436573}
   m_Layer: 0
   m_Name: Floor (6)
   m_TagString: Untagged
@@ -708,6 +723,18 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
+--- !u!114 &1460436573
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1460436569}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b17e1c9e6a93b4c4696072118aa79bcf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  finalPos: {x: -3.98, y: -7, z: 0}
 --- !u!1 &1517639786
 GameObject:
   m_ObjectHideFlags: 0
@@ -1283,6 +1310,7 @@ GameObject:
   - component: {fileID: 2019620361}
   - component: {fileID: 2019620363}
   - component: {fileID: 2019620362}
+  - component: {fileID: 2019620364}
   m_Layer: 0
   m_Name: Floor (7)
   m_TagString: Untagged
@@ -1370,3 +1398,15 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
+--- !u!114 &2019620364
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2019620360}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b17e1c9e6a93b4c4696072118aa79bcf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  finalPos: {x: 3.98, y: -7, z: 0}

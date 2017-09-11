@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour {
     }
 
     private static GameManager _instance = null;
+    [SerializeField]
     private GameState currentState = GameState.TitleScreen;
     private GameObject currentLevel;
     private List<Player> players = new List<Player>();
@@ -56,8 +57,7 @@ public class GameManager : MonoBehaviour {
                             currentLevel = go;
                     }
 
-                    if (!currentLevel.activeSelf)
-                        currentLevel.SetActive(true);
+                    currentLevel.GetComponentInChildren<Canvas>(true).gameObject.SetActive(true);
 
                     if (SceneManager.sceneCount == 1)
                     {
@@ -93,8 +93,7 @@ public class GameManager : MonoBehaviour {
                             currentLevel = go;
                     }
 
-                    if (!currentLevel.activeSelf)
-                        currentLevel.SetActive(true);
+                    currentLevel.GetComponentInChildren<Canvas>(true).gameObject.SetActive(true);
 
                     if (SceneManager.sceneCount == 1)
                     {
