@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour {
     }
 
     private static GameManager _instance = null;
+    private static int numPlayers = 2;
     [SerializeField]
     private GameState currentState = GameState.TitleScreen;
     private GameObject currentLevel;
@@ -67,7 +68,7 @@ public class GameManager : MonoBehaviour {
                         SceneManager.LoadSceneAsync(1, LoadSceneMode.Additive);
                     }
 
-                    currentLevel.GetComponentInChildren<Button>().onClick.AddListener(InitGame);
+                    currentLevel.GetComponentInChildren<Button>().onClick.AddListener(Init2PGame);
                 }
                 break;
 
@@ -76,7 +77,10 @@ public class GameManager : MonoBehaviour {
                     return;
 
                 if (currentLevel == null)
-                    StartGame();
+                    if (numPlayers == 2)
+                        StartGame(2);
+                    else if (numPlayers == 4)
+                        StartGame(4);
 
                 if (CheckIfPlayersAlive())
                     UpdateUI();
@@ -111,7 +115,7 @@ public class GameManager : MonoBehaviour {
         }
 	}
 
-    public void InitGame()
+    public void Init2PGame()
     {
         if (SceneManager.sceneCount > 1)
             SceneManager.MergeScenes(SceneManager.GetSceneAt(0), SceneManager.GetSceneAt(1));
@@ -122,9 +126,26 @@ public class GameManager : MonoBehaviour {
         NavCamera.Instance.MoveToNewLocation(Vector2.zero);
 
         currentState = GameState.InGame;
+
+        numPlayers = 2;
     }
 
-    void StartGame()
+    public void Init4PGame()
+    {
+        if (SceneManager.sceneCount > 1)
+            SceneManager.MergeScenes(SceneManager.GetSceneAt(0), SceneManager.GetSceneAt(1));
+
+        Destroy(currentLevel);
+
+        //Tween Camera
+        NavCamera.Instance.MoveToNewLocation(Vector2.zero);
+
+        currentState = GameState.InGame;
+
+        numPlayers = 4;
+    }
+
+    void StartGame(int numPlayers)
     {
         if (currentLevel == null)
             currentLevel = GameObject.Find("Level");
@@ -133,20 +154,27 @@ public class GameManager : MonoBehaviour {
 
         //Instantiate players
         //Find spawn points
-        GameObject p1SP = null;
-        GameObject p2SP = null;
+        //GameObject p1SP = null;
+        //GameObject p2SP = null;
+
+        List<Transform> spawnPoints = new List<Transform>();
 
         foreach (Transform child in currentLevel.transform)
         {
-            if (child.name.ToLower().Contains("spawnpoint_p1"))
+            if (child.name.ToLower().Contains("spawnpoint"))
             {
-                p1SP = child.gameObject;
+                spawnPoints.Add(child);
             }
 
-            if (child.name.ToLower().Contains("spawnpoint_p2"))
-            {
-                p2SP = child.gameObject;
-            }
+            //if (child.name.ToLower().Contains("spawnpoint_p1"))
+            //{
+            //    p1SP = child.gameObject;
+            //}
+
+            //if (child.name.ToLower().Contains("spawnpoint_p2"))
+            //{
+            //    p2SP = child.gameObject;
+            //}
 
             if (child.name.ToLower().Contains("canvas"))
             {
@@ -154,8 +182,18 @@ public class GameManager : MonoBehaviour {
             }
         }
 
-        InstantiatePlayer(p1SP.transform.position, 1);
-        InstantiatePlayer(p2SP.transform.position, 2);
+        //InstantiatePlayer(p1SP.transform.position, 1);
+        //InstantiatePlayer(p2SP.transform.position, 2);
+
+        for (int i = 1; i <= numPlayers; i++)
+        {
+            int spawnIndex = Random.Range(0, spawnPoints.Count - 1);
+
+            Transform spawnPt = spawnPoints[spawnIndex];
+            InstantiatePlayer(spawnPt.transform.position, i);
+
+            spawnPoints.RemoveAt(spawnIndex);
+        }
     }
 
     void EndGame()

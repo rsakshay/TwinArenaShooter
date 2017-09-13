@@ -133,7 +133,7 @@ MonoBehaviour:
   MAX_SPEED: 5
   HP: 10
   rocket: {fileID: 1497181708180340, guid: 492fa1a63d8224a44a0ca0ea5c5660a1, type: 2}
-  aimSpeed: 2
+  aimSpeed: 3
 --- !u!212 &212289316296682506
 SpriteRenderer:
   m_ObjectHideFlags: 1
