@@ -5,6 +5,7 @@ using UnityEngine;
 public class Oscillator : MonoBehaviour {
 
     public Vector3 finalPos;
+    public float slowdownFactor = 1;
 
     Vector3 startPos;
 
@@ -15,6 +16,6 @@ public class Oscillator : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        transform.position = Vector3.Lerp(startPos, finalPos, Mathf.Abs(Mathf.Sin(Time.timeSinceLevelLoad)));
+        transform.position = Vector3.Lerp(startPos, finalPos, Mathf.Abs(Mathf.Sin(Time.timeSinceLevelLoad / slowdownFactor)));
 	}
 }

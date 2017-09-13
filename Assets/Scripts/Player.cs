@@ -8,6 +8,8 @@ public class Player : MonoBehaviour {
     public float MAX_SPEED = 10;
     public int HP = 10;
     public GameObject rocket;
+    public float aimSpeed = 2;
+    GameObject aim;
 
     enum RocketState
     {
@@ -22,6 +24,7 @@ public class Player : MonoBehaviour {
     void Start () {
 
         rgb2d = GetComponent<Rigidbody2D>();
+        aim = transform.GetChild(0).gameObject;
 
 	}
 	
@@ -43,10 +46,17 @@ public class Player : MonoBehaviour {
             y = 5;
         }
 
+        if (rocketState == RocketState.Available)
+        {
+            float aimDir = Input.GetAxis("RStickHor_P" + playerNumber);
+
+            aim.transform.RotateAround(transform.position, Vector3.forward, -aimDir * aimSpeed);
+        }
+
         if (Input.GetButtonDown("Fire1_P" + playerNumber) && rocketState == RocketState.Available)
         {
             //Fire
-            GameObject laaunchedRocket = Instantiate(rocket, transform.position + (Vector3.up * 2), Quaternion.identity);
+            GameObject laaunchedRocket = Instantiate(rocket, transform.position + (aim.transform.up * (GetComponent<BoxCollider2D>().bounds.extents.y + 0.75f)), aim.transform.rotation);
             laaunchedRocket.GetComponent<Rocket>().LiftOff(playerNumber);
 
             rocketState = RocketState.Fired;
