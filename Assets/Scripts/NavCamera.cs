@@ -15,6 +15,7 @@ public class NavCamera : MonoBehaviour {
 
     private static NavCamera _instance = null;
     private Vector3 targetPos = Vector3.zero;
+    private Vector3 velocity = Vector3.zero;
 
     private void Awake()
     {
@@ -42,13 +43,14 @@ public class NavCamera : MonoBehaviour {
                 break;
 
             case CameraState.Moving:
-                if ((int)transform.position.magnitude == (int)targetPos.magnitude)
+                if (transform.position.magnitude - targetPos.magnitude <= 0.001f && transform.position.magnitude - targetPos.magnitude > 0)
                 {
                     transform.position = targetPos;
                     currentState = CameraState.Static;
                 }
                 else
-                    transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * moveSpeed);
+                    //transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * moveSpeed);
+                    transform.position = Vector3.SmoothDamp(transform.position, targetPos, ref velocity, moveSpeed);
                 break;
         }
     }

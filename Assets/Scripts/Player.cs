@@ -9,28 +9,45 @@ public class Player : MonoBehaviour {
     public int HP = 10;
     public GameObject rocket;
     public float aimSpeed = 2;
-    GameObject aim;
-
+    public float InvulnerableTime = 2;
+    
     enum RocketState
     {
         Available = 0,
         Fired
     }
+
+    enum PlayerState
+    {
+        Vulnerable = 0,
+        Invulnerable
+    }
     
     private Rigidbody2D rgb2d;
     private RocketState rocketState = RocketState.Available;
+    private PlayerState playerState = PlayerState.Vulnerable;
+    private GameObject aim;
+    private Vector3 startPos;
+    private Color baseColor;
+    private float timeHit;
 
     // Use this for initialization
     void Start () {
 
         rgb2d = GetComponent<Rigidbody2D>();
         aim = transform.GetChild(0).gameObject;
-
+        startPos = transform.position;
+        baseColor = GetComponent<SpriteRenderer>().color;
 	}
 	
 	// Update is called once per frame
 	void Update () {
         HandleInputs();
+
+        if (playerState == PlayerState.Invulnerable)
+        {
+            DoInvulnerableAction();
+        }
 	}
 
     void HandleInputs()
@@ -60,6 +77,8 @@ public class Player : MonoBehaviour {
             laaunchedRocket.GetComponent<Rocket>().LiftOff(playerNumber);
 
             rocketState = RocketState.Fired;
+
+            aim.SetActive(false);
         }
 
 
@@ -74,17 +93,24 @@ public class Player : MonoBehaviour {
         rgb2d.AddForce(Vector2.up * y, ForceMode2D.Impulse);
     }
 
-    public void TakeDamage(int val)
+    public void TakeDamage(int val, bool bypassInvulState = false)
     {
-        HP -= val;
+        if (playerState == PlayerState.Vulnerable || bypassInvulState)
+        {
+            HP -= val;
 
-        if (HP <= 0)
-            Destroy(gameObject);
+            if (HP <= 0)
+                Destroy(gameObject);
+
+            timeHit = Time.time;
+            playerState = PlayerState.Invulnerable;
+        }
     }
 
     public void OnRocketDestroyed()
     {
         rocketState = RocketState.Available;
+        aim.SetActive(true);
     }
 
     private bool IsGrounded()
@@ -98,5 +124,24 @@ public class Player : MonoBehaviour {
         }
 
         return false;
+    }
+
+    void DoInvulnerableAction()
+    {
+        if ((Time.time - timeHit) >= InvulnerableTime)
+        {
+            GetComponent<SpriteRenderer>().color = baseColor;
+            playerState = PlayerState.Vulnerable;
+            return;
+        }
+
+        GetComponent<SpriteRenderer>().color = Color.Lerp(baseColor, Color.white, Mathf.PingPong(Time.time * 2, 1));
+    }
+
+    private void OnBecameInvisible()
+    {
+        transform.position = startPos;
+        rgb2d.velocity = Vector2.zero;
+        TakeDamage(1, true);
     }
 }

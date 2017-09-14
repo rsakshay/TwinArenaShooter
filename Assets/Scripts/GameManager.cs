@@ -19,12 +19,13 @@ public class GameManager : MonoBehaviour {
     }
 
     private static GameManager _instance = null;
-    private static int numPlayers = 2;
+    private static int numPlayers = 0;
     [SerializeField]
     private GameState currentState = GameState.TitleScreen;
     private GameObject currentLevel;
     private List<Player> players = new List<Player>();
     private int winner = 0;
+    private Dictionary<int, Text> HPTexts = new Dictionary<int, Text>();
 
     private void Awake()
     {
@@ -60,15 +61,14 @@ public class GameManager : MonoBehaviour {
 
                     currentLevel.GetComponentInChildren<Canvas>(true).gameObject.SetActive(true);
 
-                    if (SceneManager.sceneCount == 1)
+                    foreach (Button button in currentLevel.GetComponentsInChildren<Button>())
                     {
-                        currentLevel.transform.Translate(Vector3.up * 20);
-                        NavCamera.Instance.transform.Translate(Vector3.up * 20);
+                        if (button.gameObject.name.ToLower().Contains("2p"))
+                            button.onClick.AddListener(Init2PGame);
 
-                        SceneManager.LoadSceneAsync(1, LoadSceneMode.Additive);
+                        if (button.gameObject.name.ToLower().Contains("4p"))
+                            button.onClick.AddListener(Init4PGame);
                     }
-
-                    currentLevel.GetComponentInChildren<Button>().onClick.AddListener(Init2PGame);
                 }
                 break;
 
@@ -77,10 +77,18 @@ public class GameManager : MonoBehaviour {
                     return;
 
                 if (currentLevel == null)
+                {
+                    if (numPlayers == 0)
+                    {
+                        Debug.Log("numPlayers is 0. Calculating num of players...");
+                        numPlayers = GameObject.Find("Level").GetComponentsInChildren<Text>(true).Length;
+                    }
+
                     if (numPlayers == 2)
                         StartGame(2);
                     else if (numPlayers == 4)
                         StartGame(4);
+                }
 
                 if (CheckIfPlayersAlive())
                     UpdateUI();
@@ -117,40 +125,51 @@ public class GameManager : MonoBehaviour {
 
     public void Init2PGame()
     {
-        if (SceneManager.sceneCount > 1)
-            SceneManager.MergeScenes(SceneManager.GetSceneAt(0), SceneManager.GetSceneAt(1));
+        InitScene();
 
+        currentLevel.transform.Translate(Vector3.up * 20);
+        NavCamera.Instance.transform.Translate(Vector3.up * 20);
+
+        SceneManager.LoadSceneAsync(1, LoadSceneMode.Additive);
+
+        numPlayers = 2;
+
+        //StartGame(2);
+    }
+
+    void InitScene()
+    {
+        currentLevel.name += "Prev";
         Destroy(currentLevel);
-        
+
         //Tween Camera
         NavCamera.Instance.MoveToNewLocation(Vector2.zero);
 
         currentState = GameState.InGame;
-
-        numPlayers = 2;
     }
 
     public void Init4PGame()
     {
-        if (SceneManager.sceneCount > 1)
-            SceneManager.MergeScenes(SceneManager.GetSceneAt(0), SceneManager.GetSceneAt(1));
+        InitScene();
 
-        Destroy(currentLevel);
+        currentLevel.transform.Translate(Vector3.up * 20);
+        NavCamera.Instance.transform.Translate(Vector3.up * 20);
 
-        //Tween Camera
-        NavCamera.Instance.MoveToNewLocation(Vector2.zero);
-
-        currentState = GameState.InGame;
+        SceneManager.LoadSceneAsync(2, LoadSceneMode.Additive);
 
         numPlayers = 4;
+
+        //StartGame(4);
     }
 
     void StartGame(int numPlayers)
     {
-        if (currentLevel == null)
-            currentLevel = GameObject.Find("Level");
+        if (SceneManager.sceneCount > 1)
+            SceneManager.MergeScenes(SceneManager.GetSceneAt(0), SceneManager.GetSceneAt(1));
 
-        SceneManager.LoadSceneAsync(2, LoadSceneMode.Additive);
+        currentLevel = GameObject.Find("Level");
+
+        SceneManager.LoadSceneAsync(SceneManager.sceneCountInBuildSettings - 1, LoadSceneMode.Additive);
 
         //Instantiate players
         //Find spawn points
@@ -194,6 +213,8 @@ public class GameManager : MonoBehaviour {
 
             spawnPoints.RemoveAt(spawnIndex);
         }
+
+        FindUIElements();
     }
 
     void EndGame()
@@ -218,34 +239,91 @@ public class GameManager : MonoBehaviour {
 
     void UpdateUI()
     {
-        Transform canvas = currentLevel.GetComponentInChildren<Canvas>(true).transform;
-
-        foreach(Transform child in canvas)
+        foreach(int pNum in HPTexts.Keys)
         {
-            if (child.name.ToLower().Contains("p1hp"))
-            {
-                child.GetComponent<Text>().text = "Player 1 HP: " + players[0].HP;
-            }
+            Text hpText;
+            HPTexts.TryGetValue(pNum, out hpText);
 
-            if (child.name.ToLower().Contains("p2hp"))
+            if (players[pNum - 1] != null)
             {
-                child.GetComponent<Text>().text = "Player 2 HP: " + players[1].HP;
+                hpText.text = "Player " + pNum + " HP: " + players[pNum - 1].HP;
+            }
+            else
+            {
+                hpText.text = "Player " + pNum + " HP: 0";
             }
         }
     }
 
+    void FindUIElements()
+    {
+        Transform canvas = currentLevel.GetComponentInChildren<Canvas>(true).transform;
+
+        foreach (Transform child in canvas)
+        {
+            int playerNum = 0;
+
+            if (child.name.ToLower().Contains("p1hp") && players[0] != null)
+            {
+                //child.GetComponent<Text>().text = "Player 1 HP: " + players[0].HP;
+                playerNum = 1;
+            }
+
+            if (child.name.ToLower().Contains("p2hp") && players[1] != null)
+            {
+                //child.GetComponent<Text>().text = "Player 2 HP: " + players[1].HP;
+                playerNum = 2;
+            }
+
+            if (child.name.ToLower().Contains("p3hp") && players[2] != null)
+            {
+                //child.GetComponent<Text>().text = "Player 3 HP: " + players[2].HP;
+                playerNum = 3;
+            }
+
+            if (child.name.ToLower().Contains("p4hp") && players[3] != null)
+            {
+                //child.GetComponent<Text>().text = "Player 4 HP: " + players[3].HP;
+                playerNum = 4;
+            }
+
+            HPTexts.Add(playerNum, child.GetComponent<Text>());
+        }
+    }
+
+    void ClearUIElements()
+    {
+        HPTexts.Clear();
+    }
+
     bool CheckIfPlayersAlive()
     {
-        int win = 1;
+        int numPlayersDead = 0;
+
+        bool[] alivePlayers = new bool[numPlayers];
+        int i = 0;
+
         foreach (Player player in players)
         {
             if (player == null)
             {
-                winner = win;
-                return false;
+                alivePlayers[i] = false;
+                numPlayersDead++;
             }
+            else
+                alivePlayers[i] = true;
+            
+            i++;
+        }
 
-            win = (win + 1) % 2;
+        if (numPlayersDead >= numPlayers - 1)
+        {
+            for(int j = 0; j < numPlayers; j++)
+            {
+                if (alivePlayers[j])
+                    winner = j;
+            }
+            return false;
         }
 
         return true;
@@ -281,6 +359,7 @@ public class GameManager : MonoBehaviour {
         currentState = GameState.TitleScreen;
 
         players.Clear();
+        ClearUIElements();
         winner = 0;
     }
 
