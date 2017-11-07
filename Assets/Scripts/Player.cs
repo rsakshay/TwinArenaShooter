@@ -6,6 +6,7 @@ public class Player : MonoBehaviour {
 
     public int playerNumber = 1;
     public float MAX_SPEED = 10;
+    public float JumpSpeed = 5;
     public int HP = 10;
     public GameObject rocket;
     public float aimSpeed = 2;
@@ -60,7 +61,7 @@ public class Player : MonoBehaviour {
 
         if (Input.GetButtonDown("Jump_P" + playerNumber) && IsGrounded())
         {
-            y = 5;
+            y = JumpSpeed;
         }
 
         if (rocketState == RocketState.Available)
@@ -140,8 +141,14 @@ public class Player : MonoBehaviour {
 
     private void OnBecameInvisible()
     {
-        transform.position = startPos;
-        rgb2d.velocity = Vector2.zero;
-        TakeDamage(1, true);
+        //transform.position = startPos;
+        //rgb2d.velocity = Vector2.zero;
+        //TakeDamage(1, true);
+
+        if (transform.position.y < 0)
+        {
+            transform.position = new Vector2(transform.position.x, -transform.position.y);
+            rgb2d.velocity = Vector2.zero;
+        }
     }
 }
